@@ -1,4 +1,6 @@
 #include "sort.h"
+
+void counting_sort(int *array, size_t size);
 /**
  * counting_sort - counting sort algo
  * @array: array to sort
