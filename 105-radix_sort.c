@@ -94,12 +94,13 @@ void radix_sort(int *array, size_t size)
 	if (new_array == NULL)
 		return;
 
-	position = 1;
 	max = get_max(array, size);
+	position = 1;
 	while (max / position > 0)
 	{
 		radix_counting_sort(array, size, position, new_array);
-		print_array(array, size);
 		position *= 10;
+		print_array(array, size);
 	}
+	free(new_array);
 }
