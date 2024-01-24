@@ -1,68 +1,69 @@
 #include "sort.h"
 
 /**
- * bitonic_compare - compares and swaps two integers in an array
- * @array: array
- * @i: first integer
- * @j: second integer
- * @dir: order of swap
+ * bitonic_compare - Swap two integers in an array.
+ * @i: The first integer to swap.
+ * @j: The second integer to swap.
  */
-void bitonic_compare(int *array, int i, int j, int dir)
+void bitonic_compare(int *i, int *j)
 {
-	int swap;
+	int temp;
 
-	if ((dir == 1 && array[i] > array[j]) || (dir == 0 && array[i] < array[j]))
-	{
-		swap = array[i];
-		array[i] = array[j];
-		array[j] = swap;
-	}
+	temp = *i;
+	*i = *j;
+	*j = temp;
 }
 
 /**
  * bitonic_merge - Sort a bitonic sequence inside an array of integers.
- * @array: array
- * @start: The starting index of the sequence in array to sort
+ * @array: An array of integers.
  * @size: The size of the array.
- * @dir: The direction to sort in
+ * @start: The starting index of the sequence in array to sort.
+ * @seq: The size of the sequence to sort.
+ * @dir: The direction to sort in.
  */
-void bitonic_merge(int *array, size_t start, size_t size, int dir)
+void bitonic_merge(int *array, size_t size, size_t start, size_t seq,
+		char dir)
 {
-	size_t i, mid;
+	size_t i, mid = seq / 2;
 
-	if (size > 1)
+	if (seq > 1)
 	{
-		mid = size / 2;
-		i = start;
-		while (i < start + mid)
+		for (i = start; i < start + mid; i++)
 		{
-			bitonic_compare(array, i, i + mid, dir);
-			i++;
+			if ((dir == UP && array[i] > array[i + mid]) ||
+			    (dir == DOWN && array[i] < array[i + mid]))
+				bitonic_compare(array + i, array + i + mid);
 		}
-		bitonic_merge(array, start, mid, dir);
-		bitonic_merge(array, start + mid, mid, dir);
+		bitonic_merge(array, size, start, mid, dir);
+		bitonic_merge(array, size, start + mid, mid, dir);
 	}
 }
 
 /**
  * create_bitonic - Convert an array of integers into a bitonic sequence.
- * @array: array
- * @start: The starting index of a block of the building bitonic sequence
- * @size: size of the array
- * @dir: The direction to sort the bitonic sequence block in
+ * @array: An array of integers.
+ * @size: The size of the array.
+ * @start: The starting index of a block of the building bitonic sequence.
+ * @seq: The size of a block of the building bitonic sequence.
+ * @dir: The direction to sort the bitonic sequence block in.
  */
-void create_bitonic(int *array, size_t start, size_t size, int dir)
+void create_bitonic(int *array, size_t size, size_t start, size_t seq, char dir)
 {
-	size_t mid;
+	size_t mid = seq / 2;
+	char *str = (dir == UP) ? "UP" : "DOWN";
 
-	if (size > 1)
+	if (seq > 1)
 	{
-		mid = size / 2;
-		print_array(array + start, mid);
-		create_bitonic(array, start, mid, 1);
-		create_bitonic(array, start + mid, mid, 0);
-		bitonic_merge(array, start, size, dir);
-		print_array(array + start, mid);
+		printf("Merging [%lu/%lu] (%s):\n", seq, size, str);
+		print_array(array + start, seq);
+
+		create_bitonic(array, size, start, mid, UP);
+		create_bitonic(array, size, start + mid, mid, DOWN);
+		bitonic_merge(array, size, start, seq, dir);
+
+		printf("Result [%lu/%lu] (%s):\n", seq, size, str);
+		print_array(array + start, seq);
 	}
 }
 
@@ -74,10 +75,8 @@ void create_bitonic(int *array, size_t start, size_t size, int dir)
  */
 void bitonic_sort(int *array, size_t size)
 {
-	int dir = 1;
-
 	if (array == NULL || size < 2)
 		return;
-	create_bitonic(array, 0, size, dir);
-	print_array(array, size);
+
+	create_bitonic(array, size, 0, size, UP);
 }
